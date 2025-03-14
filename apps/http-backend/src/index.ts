@@ -48,25 +48,39 @@ app.post("/signup", async (req, res) => {
     message: "An Error Occurred",
   });
 });
-app.post("/signin", (req, res) => {
-  const data = SigninSchema.safeParse(req.body);
-  if (!data.success) {
-    res.json({
+app.post("/signin", async(req, res) => {
+  const parsedData = SigninSchema.safeParse(req.body);
+  if (!parsedData.success) {
+    res.status(400).json({
       message: "Incorrect Options",
     });
     return;
   }
-  const userId = 1;
+  try{
+  const user = await prismaClient.user.findFirst({
+    where : {
+        email : parsedData.data?.email,
+        password : parsedData.data?.password
+    }
+  }) ;
+  if(!user){
+    res.status(403).json("User Doesnot exists")
+  }
   const token = jwt.sign(
     {
-      userId,
+     userId : user?.id,
     },
     JWT_SECRET
   );
 
-  res.json({
+  res.status(200).json({
     token,
   });
+}catch(error){
+    res.status(400).json({
+        message : "An Error Occurred"
+    })
+}
 });
 app.post("/room", middleware, (req, res) => {
   const data = CreateRoomSchema.safeParse(req.body);
