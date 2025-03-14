@@ -66,6 +66,7 @@ app.post("/signin", async (req, res) => {
     });
     return;
   }
+
   try {
     const user = await prismaClient.user.findFirst({
       where: {
@@ -73,9 +74,12 @@ app.post("/signin", async (req, res) => {
         password: parsedData.data?.password,
       },
     });
+
     if (!user) {
-      res.status(403).json("User Doesnot exists");
+      res.status(403).json({ message: "User Doesnot exist" });
+      return;
     }
+
     const token = jwt.sign(
       {
         userId: user?.id,
@@ -86,12 +90,15 @@ app.post("/signin", async (req, res) => {
     res.status(200).json({
       token,
     });
+    return;
   } catch (error) {
     res.status(400).json({
       message: "An Error Occurred",
     });
+    return;
   }
 });
+
 app.post("/room", middleware, async (req, res) => {
   const parsedData = CreateRoomSchema.safeParse(req.body);
   if (!parsedData.success) {
@@ -103,15 +110,22 @@ app.post("/room", middleware, async (req, res) => {
   //Now the database calls
   // @ts-ignore
   const userId = req.userId;
-  await prismaClient.room.create({
+  try{
+  const room = await prismaClient.room.create({
     data: {
       slug: parsedData.data.name,
       adminId: userId,
     },
   });
   res.json({
-    roomId: 123,
+    roomId:room.id ,
   });
+  return;
+}catch(e){
+  res.status(411).json({
+    message : "An Error Occurred as Room Already Exists"
+  })
+}
 });
 
 app.listen(3000);
