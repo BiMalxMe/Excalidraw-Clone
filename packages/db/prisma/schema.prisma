@@ -15,7 +15,7 @@ datasource db {
 
 model User {
   id       String @id @default(uuid()) // Add a unique identifier for the user
-  email String
+  email String @unique
   password String
   name     String
   photo    String?
