@@ -1,6 +1,9 @@
 import { NextFunction, Response, Request } from "express";
 import jwt from "jsonwebtoken";
 import{JWT_SECRET} from "@repo/backend-common/config"
+
+import { prismaClient } from "@repo/db/client";
+
 export const middleware = (req: Request, res: Response, next: NextFunction) => {
   const token = req.headers["authorization"] ?? "";
 
