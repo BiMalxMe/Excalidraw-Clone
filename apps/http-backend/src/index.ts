@@ -12,41 +12,52 @@ const app = express();
 app.use(express.json());
 
 app.post("/signup", async (req, res) => {
-  const payload = req.body;
-  const parsedData = CreateUserSchema.safeParse(payload);
+  const parsedData = CreateUserSchema.safeParse(req.body);
   if (!parsedData.success) {
-    res.json({
-      message: "Incorrect Options",
-    });
-    return;
+     res.json({ message: "Incorrect Inputs" });
+     return;
   }
-  const existingUser = prismaClient.user.findUnique({
-    where: {
-      email: parsedData.data.email,
-    },
+
+  const existingUser = await prismaClient.user.findUnique({
+    where: { email: parsedData.data.email },
   });
+
   if (!existingUser) {
     try {
       await prismaClient.user.create({
         data: {
           email: parsedData.data?.email,
           password: parsedData.data?.password,
-          name: parsedData.data?.password,
+          name: parsedData.data?.name,
         },
       });
-
-      //db call
-      res.json({
-        message: "User Signed Up",
-      });
+       res.json({ message: "User Signed Up" });
+       return;
     } catch (error) {
-      message: "An Error Occurred";
+       res.json({ message: "An Error Occurred" });
+       return;
     }
   }
-  res.json({
-    message: "An Error Occurred",
-  });
+
+   res.json({ message: "User already exists" });
+   return;
 });
+
+  //This code is written while checking the database functioningg
+  
+//   const parsedData = req.body
+//   await prismaClient.user.create({
+// data : {
+//   name : parsedData.name,
+//   email : parsedData.email,
+//   password : parsedData.password
+// }
+//   })
+//   res.json({
+//     msg : "Message Created Sucessfully"
+//   })
+
+
 app.post("/signin", async (req, res) => {
   const parsedData = SigninSchema.safeParse(req.body);
   if (!parsedData.success) {
