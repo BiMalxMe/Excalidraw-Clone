@@ -8,7 +8,6 @@ import {
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "@repo/backend-common/config";
 import { prismaClient } from "@repo/db/client";
-import e from "express";
 const app = express();
 app.use(express.json());
 
@@ -48,7 +47,7 @@ app.post("/signup", async (req, res) => {
     message: "An Error Occurred",
   });
 });
-app.post("/signin", async(req, res) => {
+app.post("/signin", async (req, res) => {
   const parsedData = SigninSchema.safeParse(req.body);
   if (!parsedData.success) {
     res.status(400).json({
@@ -56,42 +55,49 @@ app.post("/signin", async(req, res) => {
     });
     return;
   }
-  try{
-  const user = await prismaClient.user.findFirst({
-    where : {
-        email : parsedData.data?.email,
-        password : parsedData.data?.password
+  try {
+    const user = await prismaClient.user.findFirst({
+      where: {
+        email: parsedData.data?.email,
+        password: parsedData.data?.password,
+      },
+    });
+    if (!user) {
+      res.status(403).json("User Doesnot exists");
     }
-  }) ;
-  if(!user){
-    res.status(403).json("User Doesnot exists")
-  }
-  const token = jwt.sign(
-    {
-     userId : user?.id,
-    },
-    JWT_SECRET
-  );
+    const token = jwt.sign(
+      {
+        userId: user?.id,
+      },
+      JWT_SECRET
+    );
 
-  res.status(200).json({
-    token,
-  });
-}catch(error){
+    res.status(200).json({
+      token,
+    });
+  } catch (error) {
     res.status(400).json({
-        message : "An Error Occurred"
-    })
-}
+      message: "An Error Occurred",
+    });
+  }
 });
-app.post("/room", middleware, (req, res) => {
-  const data = CreateRoomSchema.safeParse(req.body);
-  if (!data.success) {
+app.post("/room", middleware, async (req, res) => {
+  const parsedData = CreateRoomSchema.safeParse(req.body);
+  if (!parsedData.success) {
     res.json({
       message: "Incorrect Inpputss",
     });
     return;
   }
   //Now the database calls
-
+  // @ts-ignore
+  const userId = req.userId;
+  await prismaClient.room.create({
+    data: {
+      slug: parsedData.data.name,
+      adminId: userId,
+    },
+  });
   res.json({
     roomId: 123,
   });
