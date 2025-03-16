@@ -13,6 +13,6 @@ export default async function ChatRoom({id}:{
 }){
     const messages = await getChats(id)
 
-
+console.log(messages)
     return <ChatRoomClient id={id} message={messages}/>
 }

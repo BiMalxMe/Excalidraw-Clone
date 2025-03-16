@@ -1,4 +1,3 @@
-"use client"
 import axios from "axios";
 import { BACKEND_URL } from "../../config";
 import ChatRoom  from "../../components/ChatRoom";
@@ -15,7 +14,7 @@ export default async function Home({
         slug : string
     }
 }){
-    const slug = params.slug;
+    const slug =(await params).slug;
     console.log(slug)
     const roomId = await getRoomId(slug)
     console.log(roomId)
