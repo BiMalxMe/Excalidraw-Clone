@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { WS_URL } from "../config";
 
-export function useSocket(){
+export  function useSocket(){
     const [loading,setloading] = useState(true);
     const [socket,setsocket] = useState<WebSocket>();
 

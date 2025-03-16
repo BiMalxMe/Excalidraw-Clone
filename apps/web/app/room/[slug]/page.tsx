@@ -1,11 +1,14 @@
+"use client"
 import axios from "axios";
 import { BACKEND_URL } from "../../config";
+import ChatRoom  from "../../components/ChatRoom";
 
 async function getRoomId(slug:string){
-    axios.get(`${BACKEND_URL}/room/${slug}`)
+   const response = await axios.get(`${BACKEND_URL}/room/${slug}`)
+    return  response.data.room.id
 }
 
-export default async function ChatRoom({
+export default async function Home({
     params
 }: {
     params : {
@@ -13,5 +16,9 @@ export default async function ChatRoom({
     }
 }){
     const slug = params.slug;
+    console.log(slug)
     const roomId = await getRoomId(slug)
+    console.log(roomId)
+    return <ChatRoom id={roomId}/>
+    
 }
